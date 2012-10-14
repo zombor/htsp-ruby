@@ -1,7 +1,8 @@
 require 'htsp/client'
 
 describe HTSP::Client do
-  subject { described_class.new('192.168.1.10', 9982, 'rspec') }
+  let(:socket) { TCPSocket.new('192.168.1.10', 9982) }
+  subject { described_class.new(socket, 'rspec') }
 
   context :hello do
     it 'says hello' do

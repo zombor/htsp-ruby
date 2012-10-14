@@ -6,8 +6,8 @@ module HTSP
   class Client
     attr_reader :auth
 
-    def initialize(addr, port, name)
-      @socket = TCPSocket.new(addr, port)
+    def initialize(socket, name)
+      @socket = socket
       @name = name
     end
 
