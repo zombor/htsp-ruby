@@ -1,4 +1,5 @@
 require 'socket'
+require 'digest/sha1'
 require 'htsp/message'
 
 module HTSP
@@ -12,20 +13,31 @@ module HTSP
 
     def hello
       args = {
-        'htspversion' => 6,
-        'clientname' => @name,
+        :htspversion => 6,
+        :clientname => @name,
       }
-      deliver('hello', args)
+      deliver(:hello, args)
       response = receive
       @auth = response.params['challenge']
       response
     end
 
+    def authenticate(username, password)
+      args = {
+        :username => username,
+        :digest => htsp_digest(password, @auth)
+      }
+      deliver(:authenticate, args)
+      response = receive
+      raise 'Authentication failed!' if response.params['noaccess']
+    end
+
     protected
 
     def deliver(msg, args)
-      args['method'] = msg
+      args[:method] = msg.to_s
       message = Message.new(args)
+      puts "Sending: #{message.serialize}".inspect
       @socket.write message.serialize
     end
 
@@ -43,6 +55,10 @@ module HTSP
         (d[1].ord << 16) +
         (d[2].ord << 8) +
         d[3].ord
+    end
+
+    def htsp_digest(password, challenge)
+      Digest::SHA1.digest(password+challenge)
     end
   end
 end
