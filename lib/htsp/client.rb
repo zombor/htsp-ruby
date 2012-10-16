@@ -62,7 +62,9 @@ module HTSP
 
     def enable_async_metadata
       deliver(:enableAsyncMetadata)
+    end
 
+    def stream
       while true do
         puts receive.inspect
       end
