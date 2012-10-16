@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+$LOAD_PATH << '../lib'
+
+require 'htsp/client'
+require 'optparse'
+
+module HTSP
+  class CLI
+    def self.parse_options(args)
+      opts = OptionParser.new do |opts|
+        opts.banner = "Usage: htsp [--hostname hostname] [-u username] [-p password] -c COMMAND ..."
+        opts.separator " "
+
+        opts.on("--hostname HOSTNAME", "The hostname for the HTSP backend.") do |hostname|
+          @hostname = hostname
+        end
+
+
+        opts.on("-u", "--username USERNAME", "The username for the HTSP backend.") do |username|
+          @username = username
+        end
+
+        opts.on("-p", "--password PASSWORD", "The password for the HTSP backend.") do |username|
+          @username = username
+        end
+
+        opts.on("-c", "--command COMMAND", "The command to send to the server.") do |command|
+          @command = command
+        end
+
+        opts.on_tail("-h", "--help", "Show this message") do
+          puts opts
+          exit
+        end
+      end
+
+      opts.separator ""
+      opts.parse!(args)
+    end
+
+    def self.run_client
+      socket = TCPSocket.new(@hostname, @port)
+      client = Client.new(socket, 'htsp-gem')
+      client.hello
+      client.authenticate @username, @password
+      client.send @command
+    end
+  end
+end
+
+ARGV << '-h' if ARGV.empty? && $stdin.tty?
+HTSP::CLI.parse_options(ARGV) if $stdin.tty?
+HTSP::CLI.run_client
