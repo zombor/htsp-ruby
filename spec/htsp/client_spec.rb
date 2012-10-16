@@ -29,6 +29,18 @@ describe HTSP::Client do
     end
   end
 
+  context :authenticated do
+    before :each do
+      subject.hello
+      subject.authenticate('jeremybush', 'zombor')
+    end
+
+    it 'gets the system time' do
+      response = subject.get_sys_time
+      response.params['timezone'].should == 360
+    end
+  end
+
   it 'hashes a digest' do
     challenge = "l6\x06\xcd!\x1ci\xd3\x84\xed\x08\xecX\x1c}\xbex\xa9\xeco\xe7\x06\xe6\xf0\xba%\xbd^\x06?t\xc1"
     password = 'zombor'

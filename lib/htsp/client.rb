@@ -24,21 +24,34 @@ module HTSP
     end
 
     def authenticate(username, password)
-      args = {
-        :username => username,
-        :digest => HTSP::HMF_Bin.new(htsp_digest(password, @auth))
-      }
-      deliver(:authenticate, args)
+      @username = username
+      @digest = HTSP::HMF_Bin.new(htsp_digest(password, @auth))
+      deliver(:authenticate)
       response = receive
       raise 'Authentication failed!' if response.params['noaccess']
     end
 
+    def get_sys_time
+      deliver(:getSysTime)
+      receive
+    end
+
     protected
 
-    def deliver(msg, args)
+    def deliver(msg, args = {})
       @seq = @seq + 1
-      args[:method] = msg.to_s
-      args[:seq] = @seq
+      args.merge!({
+        :method => msg.to_s,
+        :seq => @seq
+      })
+
+      if @username
+        args[:username] = @username
+      end
+      if @digest
+        args[:digest] = @digest
+      end
+
       message = Message.new(args)
       @socket.write message.serialize
     end
