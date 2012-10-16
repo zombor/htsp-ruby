@@ -60,6 +60,14 @@ module HTSP
       receive
     end
 
+    def enable_async_metadata
+      deliver(:enableAsyncMetadata)
+
+      while true do
+        puts receive.inspect
+      end
+    end
+
     protected
 
     def deliver(msg, args = {})
