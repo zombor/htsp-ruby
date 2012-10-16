@@ -55,6 +55,11 @@ module HTSP
       receive
     end
 
+    def get_disk_space
+      deliver(:getDiskSpace)
+      receive
+    end
+
     protected
 
     def deliver(msg, args = {})
