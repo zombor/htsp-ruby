@@ -25,7 +25,10 @@ module HTSP
 
     def authenticate(username, password)
       @username = username
-      @digest = HTSP::HMF_Bin.new(htsp_digest(password, @auth))
+      if password
+        @digest = HTSP::HMF_Bin.new(htsp_digest(password, @auth))
+      end
+
       deliver(:authenticate)
       response = receive
       raise 'Authentication failed!' if response.params['noaccess']
