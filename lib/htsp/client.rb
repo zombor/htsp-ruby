@@ -50,6 +50,11 @@ module HTSP
       receive
     end
 
+    def get_epg_object(object_id)
+      deliver(:getEpgObject, :id => object_id)
+      receive
+    end
+
     protected
 
     def deliver(msg, args = {})
