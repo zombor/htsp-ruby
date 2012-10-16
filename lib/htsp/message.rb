@@ -1,4 +1,11 @@
 module HTSP
+  class HMF_Bin
+    attr_reader :str
+    def initialize(str)
+      @str = str
+    end
+  end
+
   class Message
     attr_reader :params
 
@@ -53,26 +60,34 @@ module HTSP
           value = value >> 8
         end
         ret
+      elsif value.is_a? HTSP::HMF_Bin
+        value.str.length
+      else
+        raise 'Invalid Type!'
       end
     end
 
     def binary_write(message)
       binary_message = ''
       message.each_pair do |k, v|
-        binary_message = binary_message + (hmf_type(v)).chr
-        binary_message = binary_message + (k.length & 0xFF).chr
+        binary_message << (hmf_type(v)).chr
+        binary_message << (k.length & 0xFF).chr
 
         l = binary_count_value(v)
-        binary_message = binary_message + int2bin(l)
-        binary_message = binary_message + k.to_s
+        binary_message << int2bin(l)
+        binary_message << k.to_s
 
         if v.is_a? String
-          binary_message = binary_message + v
+          binary_message << v
         elsif v.is_a? Integer
           while v > 0 do
-            binary_message = binary_message  + (v & 0xFF).chr
+            binary_message << (v & 0xFF).chr
             v = v >> 8
           end
+        elsif v.is_a? HTSP::HMF_Bin
+          binary_message << v.str
+        else
+          raise 'Invalid Type!'
         end
       end
 
@@ -120,6 +135,8 @@ module HTSP
         HMF_STR
       elsif value.is_a? Integer
         HMF_S64
+      elsif value.is_a? HTSP::HMF_Bin
+        HMF_BIN
       end
     end
 

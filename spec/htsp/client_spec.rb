@@ -20,8 +20,7 @@ describe HTSP::Client do
   context :authenticate do
     it 'successfully authenticates' do
       subject.hello
-      response = subject.authenticate('jeremybush', 'zombor')
-      puts response.inspect
+      lambda { response = subject.authenticate('jeremybush', 'zombor') }.should_not raise_error
     end
 
     it 'raises an error if authentication fails' do

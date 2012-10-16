@@ -9,6 +9,7 @@ module HTSP
     def initialize(socket, name)
       @socket = socket
       @name = name
+      @seq = 0
     end
 
     def hello
@@ -25,7 +26,7 @@ module HTSP
     def authenticate(username, password)
       args = {
         :username => username,
-        :digest => htsp_digest(password, @auth)
+        :digest => HTSP::HMF_Bin.new(htsp_digest(password, @auth))
       }
       deliver(:authenticate, args)
       response = receive
@@ -35,9 +36,10 @@ module HTSP
     protected
 
     def deliver(msg, args)
+      @seq = @seq + 1
       args[:method] = msg.to_s
+      args[:seq] = @seq
       message = Message.new(args)
-      puts "Sending: #{message.serialize}".inspect
       @socket.write message.serialize
     end
 
