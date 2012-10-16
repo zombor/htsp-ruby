@@ -119,8 +119,10 @@ module HTSP
             item = (item << 8) | data[i].ord
             i = i - 1
           end
-        elsif [HMF_LIST, HMF_MAP].include? type
+        elsif type == HMF_MAP
           item = deserialize data[0..data_length-1]
+        elsif type == HMF_LIST
+          item = deserialize_array data[0..data_length-1]
         end
 
         msg[name] = item
@@ -128,6 +130,42 @@ module HTSP
       end
 
       msg
+    end
+
+    def deserialize_array(data)
+      items = []
+
+      while data.length > 5
+        type = data[0].ord
+        nlen = data[1].ord
+        data_length = bin2int(data[2..5])
+        data = data[6..-1]
+
+        name = data[0..nlen-1]
+        data = data[nlen..-1]
+
+        if type == HMF_STR
+          item = data[0..data_length-1]
+        elsif type == HMF_BIN
+          item = hmf_bin(data[0..data_length-1])
+        elsif type == HMF_S64
+          item = 0
+          i = data_length - 1
+          while i >= 0
+            item = (item << 8) | data[i].ord
+            i = i - 1
+          end
+        elsif type == HMF_MAP
+          item = deserialize data[0..data_length-1]
+        elsif type == HMF_LIST
+          item = deserialize_array data[0..data_length-1]
+        end
+
+        items << item
+        data = data[data_length..-1]
+      end
+
+      items
     end
 
     def hmf_type(value)

@@ -39,6 +39,16 @@ describe HTSP::Client do
       response = subject.get_sys_time
       response.params['timezone'].should == 360
     end
+
+    it 'gets getEvents' do
+      response = subject.events
+      response.params['events'].length.should == 4441
+    end
+
+    it 'searches the epg' do
+      response = subject.query_events('baseball')
+      response.params['events'].length.should == 4
+    end
   end
 
   it 'hashes a digest' do

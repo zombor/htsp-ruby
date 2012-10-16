@@ -36,6 +36,17 @@ module HTSP
       receive
     end
 
+    def events
+      deliver(:getEvents)
+      receive
+    end
+
+    def query_events(title)
+      args = {:query => title, :full => 1}
+      deliver(:epgQuery, args)
+      receive
+    end
+
     protected
 
     def deliver(msg, args = {})
@@ -60,9 +71,10 @@ module HTSP
       num_bytes = bin2int(@socket.readpartial(4))
       data = ''
       while data.length < num_bytes
-        data = data + @socket.readpartial(num_bytes - data.length)
+        data << @socket.readpartial(num_bytes - data.length)
       end
-      Message.new.load_raw(data)
+      msg = Message.new.load_raw(data)
+      msg
     end
 
     def bin2int(d)
